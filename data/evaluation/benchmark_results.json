@@ -1,0 +1,237 @@
+{
+  "metadata": {
+    "evaluation_suite": "SENTINEL Phase 5 Comprehensive Benchmark",
+    "timestamp": "2026-09-22T15:26:48.114906Z",
+    "version": "5.0.0",
+    "is_measured": true,
+    "note": "All values computed from live code execution against ground truth.",
+    "total_execution_time_seconds": 42.67
+  },
+  "benchmarks": {
+    "entity_extraction": {
+      "name": "Deterministic Entity Extraction",
+      "status": "MEASURED",
+      "passed": true,
+      "overall_precision": 0.8333,
+      "overall_recall": 0.8333,
+      "overall_f1": 0.8333,
+      "breakdown": {
+        "ip": {
+          "precision": 1.0,
+          "recall": 0.8333,
+          "f1": 0.9091,
+          "detected": 5,
+          "ground_truth": 6
+        },
+        "domain": {
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571,
+          "detected": 4,
+          "ground_truth": 3
+        },
+        "user": {
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1": 0.5,
+          "detected": 2,
+          "ground_truth": 2
+        },
+        "hash": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "detected": 1,
+          "ground_truth": 1
+        }
+      },
+      "avg_file_extraction_latency_ms": 0.31,
+      "execution_time_seconds": 0.002
+    },
+    "graph_path_recovery": {
+      "name": "Graph Attack Path Recovery",
+      "status": "MEASURED",
+      "passed": true,
+      "total_nodes": 16,
+      "total_edges": 19,
+      "paths_tested": 3,
+      "paths_recovered": 3,
+      "path_recovery_rate": 1.0,
+      "tested_paths": [
+        {
+          "source": "user.smith@company.com",
+          "target": "malicious-phish.net",
+          "recovered": true
+        },
+        {
+          "source": "malicious-phish.net",
+          "target": "198.51.100.45",
+          "recovered": true
+        },
+        {
+          "source": "10.0.0.15",
+          "target": "198.51.100.45",
+          "recovered": true
+        }
+      ],
+      "cross_source_correlations_count": 7,
+      "execution_time_seconds": 0.0079
+    },
+    "vector_rag_retrieval": {
+      "name": "Semantic Vector RAG Retrieval",
+      "status": "MEASURED",
+      "passed": true,
+      "queries_evaluated": 5,
+      "precision_at_k": 0.72,
+      "hit_rate": 1.0,
+      "top_k": 5,
+      "mean_retrieval_latency_ms": 30.9432,
+      "min_retrieval_latency_ms": 24.3974,
+      "max_retrieval_latency_ms": 55.5582,
+      "std_retrieval_latency_ms": 13.7627,
+      "execution_time_seconds": 10.641
+    },
+    "case_isolation": {
+      "name": "Case Isolation Correctness",
+      "status": "MEASURED",
+      "passed": true,
+      "isolation_accuracy": 1.0,
+      "cross_case_leakage_detected": false,
+      "case_a_results_from_b": 1,
+      "execution_time_seconds": 0.123
+    },
+    "hypothesis_consistency": {
+      "name": "Hypothesis Evaluation Consistency",
+      "status": "MEASURED",
+      "passed": true,
+      "runs_evaluated": 2,
+      "leading_hypothesis_consistency_rate": 1.0,
+      "expected_leading_hypothesis": "H2",
+      "observed_leading_hypotheses": [
+        "H2",
+        "H2"
+      ],
+      "leading_score_mean": 34.6,
+      "leading_score_std": 0.0,
+      "execution_time_seconds": 0.0059
+    },
+    "tool_execution_latencies": {
+      "name": "Controlled Tool Execution Latencies",
+      "status": "MEASURED",
+      "passed": true,
+      "tools_tested": 12,
+      "overall_mean_latency_ms": 137.4762,
+      "overall_min_latency_ms": 0.0911,
+      "overall_max_latency_ms": 3072.897,
+      "overall_std_latency_ms": 566.0515,
+      "per_tool_breakdown": {
+        "search_case_evidence": {
+          "count": 3,
+          "mean": 4.1696,
+          "min": 4.1127,
+          "max": 4.2605,
+          "std": 0.0796
+        },
+        "search_logs": {
+          "count": 3,
+          "mean": 0.145,
+          "min": 0.1392,
+          "max": 0.1545,
+          "std": 0.0083
+        },
+        "lookup_threat_intel": {
+          "count": 3,
+          "mean": 522.7256,
+          "min": 2.6824,
+          "max": 1562.6764,
+          "std": 900.6239
+        },
+        "trace_entity": {
+          "count": 3,
+          "mean": 0.905,
+          "min": 0.68,
+          "max": 1.2543,
+          "std": 0.3067
+        },
+        "find_related_entities": {
+          "count": 3,
+          "mean": 0.213,
+          "min": 0.1915,
+          "max": 0.2484,
+          "std": 0.0309
+        },
+        "map_mitre": {
+          "count": 3,
+          "mean": 0.198,
+          "min": 0.0911,
+          "max": 0.3736,
+          "std": 0.1532
+        },
+        "evaluate_hypotheses": {
+          "count": 3,
+          "mean": 1031.4945,
+          "min": 8.7121,
+          "max": 3072.897,
+          "std": 1767.9076
+        },
+        "check_contradictions": {
+          "count": 3,
+          "mean": 7.9867,
+          "min": 7.7159,
+          "max": 8.1444,
+          "std": 0.2355
+        },
+        "calculate_risk": {
+          "count": 3,
+          "mean": 9.8444,
+          "min": 7.6842,
+          "max": 12.8806,
+          "std": 2.7067
+        },
+        "generate_report": {
+          "count": 3,
+          "mean": 32.0099,
+          "min": 19.1846,
+          "max": 54.4367,
+          "std": 19.4889
+        },
+        "get_investigation_memory": {
+          "count": 3,
+          "mean": 1.5289,
+          "min": 0.9623,
+          "max": 2.4722,
+          "std": 0.8224
+        },
+        "search_case_knowledge": {
+          "count": 3,
+          "mean": 38.4933,
+          "min": 22.6057,
+          "max": 65.9487,
+          "std": 23.875
+        }
+      },
+      "execution_time_seconds": 12.4422
+    },
+    "end_to_end_pipeline": {
+      "name": "End-to-End Investigation Pipeline",
+      "status": "MEASURED",
+      "passed": true,
+      "total_runs": 2,
+      "successful_runs": 2,
+      "completion_rate": 1.0,
+      "mean_pipeline_latency_seconds": 9.7241,
+      "min_pipeline_latency_seconds": 7.5315,
+      "max_pipeline_latency_seconds": 11.9167,
+      "std_pipeline_latency_seconds": 3.1008,
+      "mean_audit_steps": 8.0,
+      "execution_time_seconds": 19.4482
+    }
+  },
+  "summary": {
+    "total_benchmarks": 7,
+    "passed_benchmarks": 7,
+    "failed_benchmarks": 0,
+    "pass_rate_percent": 100.0,
+    "status": "PASS"
+  }
+}

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SENTINEL — Autonomous Cyber Incident Investigation Platform</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <div class="brand">
+      <span class="brand-icon">🛡️</span>
+      <span class="brand-title">SENTINEL</span>
+      <span class="case-badge" id="navCaseId">CASE-2026-0914</span>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <span class="badge-low" style="font-size: 11px;">💾 DB: Persisted</span>
+      <span class="badge-low" style="font-size: 11px; background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid #0284c7; font-weight: 700;">🔒 Security Hardened</span>
+      <button class="btn btn-secondary" onclick="loadDemoDataset()">🔄 Reset Demo Scenario</button>
+      <button class="btn" onclick="openExplainModal()">💡 Why did AI conclude this?</button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-overview')">📊 Overview & Risk</button>
+    <button class="tab-btn" onclick="switchTab('tab-inbox')">📥 Evidence Inbox</button>
+    <button class="tab-btn" onclick="switchTab('tab-graph')">🕸️ Investigation Graph</button>
+    <button class="tab-btn" onclick="switchTab('tab-timeline')">⏳ Attack Timeline</button>
+    <button class="tab-btn" onclick="switchTab('tab-agent')">🤖 AI Agent & Replay</button>
+    <button class="tab-btn" onclick="switchTab('tab-hypotheses')">🎯 Leads & Hypotheses</button>
+    <button class="tab-btn" onclick="switchTab('tab-threatintel')">🔍 Threat Intel & MITRE</button>
+    <button class="tab-btn" onclick="switchTab('tab-actions')">⚡ Action Center (HITL)</button>
+    <button class="tab-btn" onclick="switchTab('tab-chat')">💬 Natural Language QA</button>
+    <button class="tab-btn" onclick="switchTab('tab-metrics')">📈 Benchmark Metrics</button>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+
+    <!-- TAB 1: OVERVIEW & RISK -->
+    <div id="tab-overview" class="tab-pane active">
+      <div class="grid-4">
+        <div class="card">
+          <div class="card-title">Incident Risk Score</div>
+          <div class="stat-value" id="riskScoreVal">--</div>
+          <div class="stat-desc" id="riskSeverityBadge">CRITICAL</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Confidence Rating</div>
+          <div class="stat-value" id="confidenceVal">--</div>
+          <div class="stat-desc">Evidence Grounded</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Events Analyzed</div>
+          <div class="stat-value" id="eventsCountVal">--</div>
+          <div class="stat-desc">Across 6 Security Logs</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Leading Hypothesis</div>
+          <div class="stat-value" style="font-size: 20px;" id="leadingHypoVal">Evaluating...</div>
+          <div class="stat-desc" id="hypoScoreVal">Posterior Prob: --%</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Risk Rationale & Impact Assessment</div>
+          <p id="confidenceGroundingText" style="margin-bottom: 12px; font-size: 14px; color: var(--text-muted);"></p>
+          <ul id="riskFactorsList" style="padding-left: 20px; line-height: 1.8;"></ul>
+        </div>
+        <div class="card">
+          <div class="card-title">Victims & Affected Systems</div>
+          <div id="impactSummaryBox" style="font-size: 14px; line-height: 1.6;">Loading impact analysis...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: EVIDENCE INBOX -->
+    <div id="tab-inbox" class="tab-pane">
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-title">Multi-Source Evidence Upload & Auto-Classification</div>
+        <form id="uploadForm" onsubmit="handleFileUpload(event)">
+          <input type="file" id="fileInput" multiple style="margin-right: 12px;">
+          <button type="submit" class="btn">Upload & Auto-Ingest</button>
+        </form>
+        <div style="margin-top: 10px; font-size: 11px; color: var(--text-muted); display: flex; gap: 16px; flex-wrap: wrap;">
+          <span>🔒 <strong>Upload Controls:</strong> Allowed: .eml, .csv, .json, .txt, .pdf</span>
+          <span>⚖️ <strong>Limits:</strong> Max 10MB/file, 25MB aggregate</span>
+          <span>🛡️ <strong>Protection:</strong> Path traversal, executable signature check, memory capping</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Ingested Evidence & Normalized Events Schema</div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Timestamp</th>
+              <th>Source Log File</th>
+              <th>Log Type</th>
+              <th>Entity</th>
+              <th>Event Action</th>
+              <th>Severity</th>
+              <th>Raw Reference</th>
+            </tr>
+          </thead>
+          <tbody id="eventsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: INVESTIGATION GRAPH -->
+    <div id="tab-graph" class="tab-pane">
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">Graph Relationship Summary</div>
+        <div id="graphSummaryBox" style="background: rgba(6, 182, 212, 0.1); border: 1px solid #0284c7; border-radius: 8px; padding: 16px; line-height: 1.7; font-size: 14px; color: var(--text-main);">
+          <p style="margin-bottom: 12px; color: var(--text-muted);">Loading graph analysis...</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>Attack Relationship Graph & Hidden Connection Discovery</span>
+          <button class="btn btn-secondary" onclick="drawGraph()">Refresh Canvas</button>
+        </div>
+        <p style="margin-bottom: 12px; font-size: 13px; color: var(--text-muted);">
+          Interactive multi-graph showing nodes (Users, Devices, Emails, Domains, IPs, Hashes) and edges (sent_to, clicked, resolved_to, connected_to, executed_on).
+        </p>
+        <canvas id="graphCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- TAB 4: ATTACK TIMELINE -->
+    <div id="tab-timeline" class="tab-pane">
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-title">Reconstructed Attack Chain Stages</div>
+        <div id="attackChainGrid" class="grid-4"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Chronological Event Timeline</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Timestamp</th>
+              <th>Source Log</th>
+              <th>Entity</th>
+              <th>Event Action</th>
+              <th>Severity</th>
+            </tr>
+          </thead>
+          <tbody id="timelineTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 5: AI AGENT & REPLAY -->
+    <div id="tab-agent" class="tab-pane">
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-title">Investigation Replay Control</div>
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <button class="btn" onclick="playReplay()">▶ Play Step-by-Step Replay</button>
+          <input type="range" id="replaySlider" min="1" max="6" value="6" style="flex: 1;" onchange="updateReplayStep(this.value)">
+          <span id="replayStepLabel" style="font-weight: 700;">Step 6 / 6</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Autonomous AI Agent Tool-Use Audit Trail</div>
+        <div id="auditTrailList"></div>
+      </div>
+    </div>
+
+    <!-- TAB 6: LEADS & HYPOTHESES -->
+    <div id="tab-hypotheses" class="tab-pane">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Analysis of Competing Hypotheses (ACH Matrix)</div>
+          <div id="hypothesesMatrix"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Dynamic Lead Queue</div>
+          <div id="leadQueueList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 7: THREAT INTEL & MITRE -->
+    <div id="tab-threatintel" class="tab-pane">
+      <div class="card">
+        <div class="card-title">Threat Intelligence Enrichment & MITRE ATT&CK Mapping</div>
+        <div id="threatIntelGrid" class="grid-2"></div>
+      </div>
+    </div>
+
+    <!-- TAB 8: ACTION CENTER -->
+    <div id="tab-actions" class="tab-pane">
+      <div class="card">
+        <div class="card-title">Human-in-the-Loop Action Approval Center</div>
+        <p style="margin-bottom: 16px; font-size: 13px; color: var(--text-muted);">
+          Destructive mitigation actions recommended by the AI Agent require explicit human investigator approval before execution.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Recommended Action</th>
+              <th>Target Asset</th>
+              <th>Severity</th>
+              <th>Evidence Grounding Rationale</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="actionsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 9: NATURAL LANGUAGE QA -->
+    <div id="tab-chat" class="tab-pane">
+      <div class="card" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div class="card-title" style="margin: 0;">Semantic Vector RAG Investigation Assistant</div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Ask natural language questions across all case evidence, logs, hypotheses, leads, and threat intel.</p>
+        </div>
+        <span class="badge-low" style="font-size: 12px; background: #1e1b4b; color: #a5b4fc; border: 1px solid #6366f1;">🧠 Semantic Vector RAG</span>
+      </div>
+      <div class="chat-container">
+        <div class="chat-box" id="chatBox">
+          <div class="msg msg-agent">
+            👋 Welcome to SENTINEL Natural Language Assistant (powered by <strong>Vector RAG & sentence-transformers</strong>). Ask any question about this incident (e.g. <i>"What evidence connects the phishing email to the endpoint?"</i>, <i>"Show evidence supporting PowerShell execution"</i>, or <i>"Why is this incident high risk?"</i>).
+          </div>
+        </div>
+        <form class="chat-input-group" onsubmit="handleChatSubmit(event)">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Type your investigative question here...">
+          <button type="submit" class="btn">Send Question</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 10: BENCHMARK METRICS -->
+    <div id="tab-metrics" class="tab-pane">
+      <div class="card" style="margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <div class="card-title" style="margin-bottom: 4px;">🔬 Phase 5 Measured Performance Benchmarks</div>
+            <div style="font-size: 12px; color: var(--text-muted);">
+              All metrics are dynamically evaluated against verified ground truth. No synthetic or hardcoded numbers.
+            </div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <span id="benchmarkStatusText" style="font-size: 12px; color: var(--text-muted);">Status: Ready</span>
+            <button class="btn btn-primary" onclick="runLiveBenchmark()" id="btnRunBenchmark">⚡ Run Live Benchmark</button>
+          </div>
+        </div>
+        <div class="grid-4" id="metricsSummaryGrid"></div>
+      </div>
+
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-title">Detailed Pipeline Experiments (Phase 5 Live Results)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Evaluation Metric</th>
+              <th>Category</th>
+              <th>Measured Value</th>
+              <th>Precision / Details</th>
+              <th>Test Count / Trials</th>
+              <th>Measurement Status</th>
+              <th>Test Result</th>
+            </tr>
+          </thead>
+          <tbody id="detailedBenchmarkTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Manual Triage vs SENTINEL Autonomous Triage Comparison</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Evaluation Metric</th>
+              <th>Manual Analyst Triage</th>
+              <th>SENTINEL Autonomous Triage</th>
+              <th>Measurement Verification</th>
+            </tr>
+          </thead>
+          <tbody id="metricsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- EXPLAINABILITY MODAL -->
+  <div id="explainModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999; justify-content: center; align-items: center; padding: 24px;">
+    <div class="card" style="max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto;">
+      <div class="card-title">
+        <span>Why Did SENTINEL Conclude This?</span>
+        <button class="btn btn-secondary" onclick="closeExplainModal()">✕ Close</button>
+      </div>
+      <div id="explainModalContent" style="line-height: 1.6; font-size: 14px;"></div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

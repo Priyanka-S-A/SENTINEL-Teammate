@@ -1,0 +1,18 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+venv/
+env/
+.pytest_cache/
+.DS_Store
+
+# Local runtime data
+sentinel.db
+*.db
+
+# Generated vector indexes
+data/vector_store/
+
+# Runtime logs
+*.log
